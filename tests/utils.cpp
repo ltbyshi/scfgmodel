@@ -110,7 +110,7 @@ struct GraphWriter
 			<< " -> Node_" << child
 			<< ";" << endl;
 	}
-}
+};
 
 void PlotCMGraph(const char* filename, CMGraph& graph)
 {
