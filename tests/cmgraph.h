@@ -11,13 +11,24 @@ struct CMGraphNode
 	
 	int Size() const
 	{
-		return children.size;
+		return children.size();
 	}
 	
-	CMGraphNode
-	{
-		state = CMSTATE_ANY;
-	}
+	CMGraphNode()
+		: state(CMSTATE_ANY)
+		{
+		}
+	
+	CMGraphNode(CMSTATE state)
+		: state(state)
+		{
+		}
+	
+	CMGraphNode(const CMGraphNode& node)
+		: state(node.state), 
+		children(node.children)
+		{
+		}
 };
 
 class CMGraph
@@ -28,7 +39,10 @@ public:
 		CreateNode(CMSTATE_ANY);
 		size = 1;
 	}
-	~CMGraph();
+	
+	~CMGraph()
+	{
+	}
 	
 	int Size() const
 	{
@@ -45,7 +59,7 @@ public:
 		return nodes[i];
 	}
 	
-	CMGraphNode& operator[](int i)
+	const CMGraphNode& operator[](int i) const
 	{
 		return nodes[i];
 	}
@@ -76,8 +90,8 @@ public:
 	template <class EdgeVisitor>
 	void TraverseEdges(EdgeVisitor& visitor)
 	{
-		for(int i = 0; i < size; i ++
-			for(int j = 0; j < nodes[i].children.size(); i ++)
+		for(size_t i = 0; i < size; i ++)
+			for(size_t j = 0; j < nodes[i].children.size(); j ++)
 				visitor(i, j);
 	}
 private:
