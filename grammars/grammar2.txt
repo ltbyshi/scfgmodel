@@ -1,0 +1,18 @@
+# adapted from book Biological Sequence Analysis
+# x, y -- any symbol
+# SS -- start S states
+# SL/SR -- left/right branch following B state
+# W -- P/L/R/B/E
+symbols:
+	A, U, C, G, EPS
+states:
+	P, L, R, SS, B, E, SR, SL, E
+productions:
+	SS -> W
+	P -> xWy
+	L -> xW
+	R -> Wy
+	B -> (SR)(SL)
+	SL -> W
+	SR -> W
+	E -> EPS
