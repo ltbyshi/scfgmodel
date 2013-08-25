@@ -8,6 +8,9 @@ struct CMGraphNode
 {
 	CMSTATE state;
 	std::vector<int> children;
+	//probability of emitting left and right symbols
+	PRECISION emitL[NUMSYMBOLS];
+	PRECISION emitR[NUMSYMBOLS];
 	
 	int Size() const
 	{
@@ -24,11 +27,7 @@ struct CMGraphNode
 		{
 		}
 	
-	CMGraphNode(const CMGraphNode& node)
-		: state(node.state), 
-		children(node.children)
-		{
-		}
+	
 };
 
 class CMGraph
@@ -36,8 +35,7 @@ class CMGraph
 public:
 	CMGraph()
 	{
-		CreateNode(CMSTATE_ANY);
-		size = 1;
+		size = 0;
 	}
 	
 	~CMGraph()
@@ -75,6 +73,34 @@ public:
 	{
 		nodes[parent].children.push_back(child);
 	}
+	//Create an edge between parent and each children
+	void CreateEdges(int parent, 
+					 const std::vector<int> children)
+	{
+		for(size_t i = 0; i < children.size(); i ++)
+			CreateEdge(parent, children[i]);
+	}
+	//Create an edge between each ancestor and each child
+	void CreateEdges(const std::vector<int> ancestors,
+					 const std::vector<int> children)
+	{
+		for(size_t i = 0; i < ancestors.size(); i ++)
+			for(size_t j = 0; j < children.size(); j ++)
+				CreateEdge(ancestors[i], children[j]);
+	}
+	//Create an edge between each ancestor and each children
+	void CreateEdges(const int* ancestors, int nAncestors,
+					 const int* children, int nChildren)
+	{
+		for(int i = 0; i < nAncestors; i ++)
+			for(int j = 0; j < nChildren; j ++)
+				CreateEdge(ancestors[i], children[j]);
+	}
+	//Create an edge to itself
+	void CreateCycle(int node)
+	{
+		CreateEdge(node, node);
+	}
 	
 	//NodeVisitor must overload () operator:
 	//void operator()(int node)
@@ -90,9 +116,9 @@ public:
 	template <class EdgeVisitor>
 	void TraverseEdges(EdgeVisitor& visitor)
 	{
-		for(size_t i = 0; i < size; i ++)
+		for(int i = 0; i < size; i ++)
 			for(size_t j = 0; j < nodes[i].children.size(); j ++)
-				visitor(i, j);
+				visitor(i, nodes[i].children[j]);
 	}
 private:
 	std::vector<CMGraphNode> nodes;
