@@ -30,7 +30,7 @@ public:
 		root.rchild = -1;
 		root.lsym = SYMBOL_EPS;
 		root.rsym = SYMBOL_EPS;
-		root.state = STATE_S;
+		root.state = STATE_SS;
 	}
 	
 	~ParseTree()
