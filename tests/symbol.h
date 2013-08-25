@@ -36,6 +36,9 @@ enum STATE {
 	STATE_S,
 	STATE_B,
 	STATE_E,
+	STATE_SS,
+	STATE_SL,
+	STATE_SR,
 	STATE_ANY
 };
 
@@ -61,6 +64,7 @@ enum CMSTATE {
 	CMSTATE_IR,
 	CMSTATE_D,
 	CMSTATE_E,
+	CMSTATE_B,
 	CMSTATE_ANY
 };
 
@@ -73,6 +77,7 @@ const CMSTATE ALLCMSTATES[] = {
 	CMSTATE_IR,
 	CMSTATE_D,
 	CMSTATE_E,
+	CMSTATE_B,
 	CMSTATE_ANY
 };
 const int NUMCMSTATES = sizeof(ALLCMSTATES) / sizeof(CMSTATE);
@@ -108,6 +113,9 @@ inline const char* StateName(STATE state)
 		CASERETURN(STATE_S, "S")
 		CASERETURN(STATE_B, "B")
 		CASERETURN(STATE_E, "E")
+		CASERETURN(STATE_SS, "SS")
+		CASERETURN(STATE_SL, "SL")
+		CASERETURN(STATE_SR, "SR")
 		CASERETURN(STATE_ANY, "?")
 		default:
 			return "?";
@@ -126,6 +134,7 @@ inline const char* CMStateName(CMSTATE state)
 		CASERETURN(CMSTATE_IR, "IR")
 		CASERETURN(CMSTATE_D, "D")
 		CASERETURN(CMSTATE_E, "E")
+		CASERETURN(CMSTATE_B, "B")
 		CASERETURN(CMSTATE_ANY, "?")
 		default:
 			return "?";
