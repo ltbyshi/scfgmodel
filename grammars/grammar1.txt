@@ -1,0 +1,14 @@
+# grammar from book Biological Sequence Analysis
+# x, y -- any symbol
+symbols:
+	A, U, C, G, EPS
+states:
+	P, L, R, S, B, E
+productions:
+	S -> P | L | R | B | E
+	P -> xPy | xLy | xRy | sBy | E
+	L -> xP | xL | xR | xB | E
+	R -> Py | Ly | Ry | By | E
+	B -> SS
+	E -> EPS
+	
