@@ -80,9 +80,9 @@ void ParseTree::Parse(const char* structure)
 				int branch = CreateLChild(T.node, SYMBOL_EPS,
 					SYMBOL_EPS, STATE_B);
 				int lchild = CreateLChild(branch, SYMBOL_EPS,
-					SYMBOL_EPS, STATE_S);
+					SYMBOL_EPS, STATE_SL);
 				int rchild = CreateRChild(branch, SYMBOL_EPS,
-					SYMBOL_EPS, STATE_S);
+					SYMBOL_EPS, STATE_SR);
 				
 				T.node = branch;
 				//position range below the left node
