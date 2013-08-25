@@ -1,6 +1,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <cstdio>
+#include <cstdarg>
 using namespace std;
 
 #include "utils.h"
@@ -31,9 +33,14 @@ void BuildPairTable(const char* structure, int length, int* table)
 	}
 }
 
-void Die(const char* message)
+void Die(const char* format, ...)
 {
-	cerr << "Error: " << message << endl;
+	char buffer[256];
+	va_list args;
+	va_start(args, format);
+	vsprintf(buffer, format, args);
+	va_end(args);
+	cerr << "Error: " << buffer << endl;
 	exit(-1);
 }
 

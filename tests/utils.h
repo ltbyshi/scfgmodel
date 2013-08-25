@@ -7,8 +7,8 @@
 
 void BuildPairTable(const char* structure, int length, int* table);
 
-//print a message and terminate
-void Die(const char* message);
+//print a formated message and terminate
+void Die(const char* format, ...);
 //draw a graph of the parse tree
 //output in .dot format
 void PlotParseTree(const char* filename, ParseTree& tree);
