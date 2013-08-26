@@ -2,7 +2,7 @@
 #define __UTILS_H__
 
 #include <cstdlib>
-#include "arraytree.h"
+#include "parsetree.h"
 #include "cmgraph.h"
 
 void BuildPairTable(const char* structure, int length, int* table);

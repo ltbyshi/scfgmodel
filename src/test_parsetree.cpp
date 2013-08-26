@@ -10,7 +10,7 @@ using namespace std;
 
 #include "queue.h"
 #include "utils.h"
-#include "arraytree.h"
+#include "parsetree.h"
 
 #if 1
 void  RandomNode(ParseTreeNode* node)

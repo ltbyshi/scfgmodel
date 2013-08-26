@@ -8,9 +8,12 @@ struct CMGraphNode
 {
 	CMSTATE state;
 	std::vector<int> children;
-	//probability of emitting left and right symbols
-	PRECISION emitL[NUMSYMBOLS];
-	PRECISION emitR[NUMSYMBOLS];
+	//transition probability
+	std::vector<PRECISION> tp;
+	//emission probability
+	PRECISION ep[NUMSYMBOLS][NUMSYMBOLS];
+	//number of left/right symbols to emit
+	int nL, nR;
 	
 	int Size() const
 	{
@@ -26,8 +29,27 @@ struct CMGraphNode
 		: state(state)
 		{
 		}
-	
-	
+	//Return the index of a child node
+	int GetChild(int i) const
+	{
+		return children[i];
+	}
+	//Return the index of a child node
+	int operator[](int i) const
+	{
+		return children[i];
+	}
+	//Return transition probability from the state
+	// to state i
+	PRECISION& TransProb(int i)
+	{
+		return tp[i];
+	}
+	//Return emission probability for pair s1, s2
+	PRECISION& EmitProb(SYMBOL s1, SYMBOL s2)
+	{
+		return ep[int(s1)][int(s2)];
+	}
 };
 
 class CMGraph

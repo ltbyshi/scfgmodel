@@ -3,10 +3,8 @@
 
 #include <vector>
 #include "matrix.h"
-#include "arraytree.h"
+#include "parsetree.h"
 #include "symbol.h"
-
-typedef PRECISION double;
 
 class SCFGModel
 {

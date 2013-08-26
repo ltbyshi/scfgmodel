@@ -143,4 +143,6 @@ inline const char* CMStateName(CMSTATE state)
 
 #undef CASERETURN
 
+typedef double PRECISION;
+
 #endif

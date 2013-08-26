@@ -5,7 +5,7 @@
 
 #include "utils.h"
 #include "cmgraph.h"
-#include "arraytree.h"
+#include "parsetree.h"
 #include "stack.h"
 
 using namespace std;
@@ -104,7 +104,7 @@ void ExpandNode(ParseTree& tree,
 			nInsNodes = 0;
 			break;
 		default:
-			Die("Invalid state in parse tree!");
+			Die("Invalid state in parse tree: %s", StateName(treeNode.state));
 	}
 	//Connect MD nodes to ancestor nodes
 	graph.CreateEdges(expNode.ancestors, expNode.nAncestors,
@@ -167,8 +167,7 @@ void RandomCMGraph(CMGraph& graph, int nNodes)
 void Test_CMGraph()
 {
 	ParseTree tree;
-	tree.Parse("..(((..).)).((.(..)))."
-			"..(((..).)).((.(..))).");
+	tree.Parse("..(((..).)).((.(..))).");
 	CMGraph graph;
 	ExpandParseTree(tree, graph);
 	PlotCMGraph("graph.dot", graph);
