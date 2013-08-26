@@ -4,6 +4,7 @@
 #include <vector>
 #include "matrix.h"
 #include "parsetree.h"
+#include "cmgraph.h"
 #include "symbol.h"
 
 class SCFGModel
@@ -26,12 +27,13 @@ public:
 private:
 	void InitModel(int nStates);
 
-	void Inside(const Vector<SYMBOL>& seq);
-	void Outside(const Vector<SYMBOL& seq);
+	void Inside(const vector<SYMBOL>& seq);
+	void Outside(const vector<SYMBOL& seq);
 	void EMIter();
 private:
 	int nStates;
 	ParseTree tree;
+	CMGraph graph;
 	//pair table
 	std::vector<int> ptable; 
 	std::vector<STATE> states;

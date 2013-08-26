@@ -24,15 +24,20 @@ struct TreeTrack
 
 void ParseTree::Parse(const char* structure)
 {
+	//Clear if the parse tree is not empty
+	if(Size() > 0)
+		Clear();
+	
 	//build a pair table
 	int length = strlen(structure);
 	int* ptable = new int[length];
 	BuildPairTable(structure, length, ptable);
 	
-	RemoveAll();
-	int root = 0;
+	//Create root node
+	CreateNode(SYMBOL_EPS, SYMBOL_EPS, STATE_SS);
+	//Push the root node into stack
 	Stack<TreeTrack> trackStk;
-	trackStk.Push(TreeTrack(root, 0, length - 1));
+	trackStk.Push(TreeTrack(GetRoot(), 0, length - 1));
 	
 	while(!trackStk.Empty())
 	{

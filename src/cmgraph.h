@@ -159,6 +159,18 @@ public:
 	{
 		CreateEdge(node, node);
 	}
+	//Emission probability
+	//State i emits left symbol s1 and right symbol s2
+	PRECISION& EmitProb(int i, int s1, int s2)
+	{
+		return nodes[i].ep[s1][s2];
+	}
+	//Transition probability
+	//State cur goes to state next
+	PRECISION& TransProb(int cur, int next)
+	{
+		return nodes[cur].tp[next];
+	}
 	
 	//NodeVisitor must overload () operator:
 	//void operator()(int node)
