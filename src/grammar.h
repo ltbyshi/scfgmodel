@@ -2,6 +2,7 @@
 #define __GRAMMAR_H__
 
 #include <vector>
+#include <list>
 #include "matrix.h"
 #include "parsetree.h"
 #include "cmgraph.h"
@@ -24,11 +25,21 @@ public:
 	Vector<SYMBOL> Optimal();
 	//suboptimal sampling
 	Vector<SYMBOL> Suboptimal();
+	//Add a training sequence
+	void AddSequence(const vector<SYMBOL>& seq);
+	//Clear all training sequences
+	void ClearSequences();
 private:
 	void InitModel(int nStates);
-
+	//Inside algorithm for one sequence
 	void Inside(const vector<SYMBOL>& seq);
+	//Outside algorithm for one sequence
 	void Outside(const vector<SYMBOL& seq);
+	//Calculate expected counts for each state transition and 
+	//symbol emission
+	void Expectation();
+	//Estimate model parameters from expected counts
+	void Maximization();
 	void EMIter();
 private:
 	int nStates;
@@ -36,11 +47,9 @@ private:
 	CMGraph graph;
 	//pair table
 	std::vector<int> ptable; 
+	//training sequences
+	std::list<vector<SYMBOL> > sequences;
 	std::vector<STATE> states;
-	//e(v, xi, xj): emission probability matrix
-	Matrix3D<PRECISION> em;	
-	//t(v, y): transision probability matrix
-	Matrix2D<PRECISION> tm; 
 	//a(v, i, j): summed probability of all parse subtrees rooted at 
 	//state v for the subsequence [i,...,j]
 	Matrix3D<PRECISION> alpha;

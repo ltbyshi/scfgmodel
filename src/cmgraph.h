@@ -21,12 +21,16 @@ struct CMGraphNode
 	std::vector<PRECISION> tp;
 	//emission probability
 	PRECISION ep[NUMSYMBOLS][NUMSYMBOLS];
-	//expected count of transitions
+	//tc[c]: expected number of transitions from this state to c
 	std::vector<PRECISION> tc;
-	//expected count of emissions
+	//Expected number of emissions from this state
+	//If a pair (a, b) is emitted, the number is ec[a][b]
+	//If a single symbol a is emitted, the number is ec[a][0]
 	PRECISION ec[NUMSYMBOLS][NUMSYMBOLS];
-	//expected count of usage of the state
-	PRECISION uc;
+	//Expected total number of transitions from this state
+	PRECISION Ttot;
+	//Expected total number of emissions from this state
+	PRECISION Etot;
 	//number of left/right symbols to emit
 	int nL, nR;
 	
