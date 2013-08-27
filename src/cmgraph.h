@@ -13,11 +13,20 @@
 struct CMGraphNode
 {
 	CMSTATE state;
+	//indices of parents in the CM graph
+	std::vector<int> parents;
+	//indices of children in the CM graph
 	std::vector<int> children;
 	//transition probability
 	std::vector<PRECISION> tp;
 	//emission probability
 	PRECISION ep[NUMSYMBOLS][NUMSYMBOLS];
+	//expected count of transitions
+	std::vector<PRECISION> tc;
+	//expected count of emissions
+	PRECISION ec[NUMSYMBOLS][NUMSYMBOLS];
+	//expected count of usage of the state
+	PRECISION uc;
 	//number of left/right symbols to emit
 	int nL, nR;
 	
@@ -27,14 +36,14 @@ struct CMGraphNode
 	}
 	
 	CMGraphNode()
-		: state(CMSTATE_ANY)
-		{
-		}
+	: state(CMSTATE_ANY)
+	{
+	}
 	
 	CMGraphNode(CMSTATE state)
-		: state(state)
-		{
-		}
+	: state(state)
+	{
+	}
 	//Return the index of a child node
 	int GetChild(int i) const
 	{
@@ -130,6 +139,9 @@ public:
 	void CreateEdge(int parent, int child)
 	{
 		nodes[parent].children.push_back(child);
+		nodes[parent].tp.push_back(0);
+		nodes[parent].tc.push_back(0);
+		nodes[child].parents.push_back(parent);
 	}
 	//Create an edge between parent and each children
 	void CreateEdges(int parent, 
@@ -159,19 +171,6 @@ public:
 	{
 		CreateEdge(node, node);
 	}
-	//Emission probability
-	//State i emits left symbol s1 and right symbol s2
-	PRECISION& EmitProb(int i, int s1, int s2)
-	{
-		return nodes[i].ep[s1][s2];
-	}
-	//Transition probability
-	//State cur goes to state next
-	PRECISION& TransProb(int cur, int next)
-	{
-		return nodes[cur].tp[next];
-	}
-	
 	//NodeVisitor must overload () operator:
 	//void operator()(int node)
 	template <class NodeVisitor>
