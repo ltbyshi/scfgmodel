@@ -5,7 +5,7 @@
 #include <cstring>
 #include <vector>
 
-#include "sequence.h"
+#include <string>
 #include "stack.h"
 #include "symbol.h"
 #include "vector.h"
@@ -15,8 +15,8 @@ struct ParseTreeNode
 	int lchild;
 	int rchild;
 	bool visited;
-	SYMBOL lsym;
-	SYMBOL rsym;
+	char lsym;
+	char rsym;
 	STATE state;
 };
 
@@ -63,14 +63,14 @@ public:
 			nodes[i].visited = false;
 	}
 	
-	int CreateLChild(int parent, SYMBOL lsym, SYMBOL rsym, STATE state)
+	int CreateLChild(int parent, char lsym, char rsym, STATE state)
 	{
 		int child = CreateNode(lsym, rsym, state);
 		nodes[parent].lchild = child;
 		return child;
 	}
 	
-	int CreateRChild(int parent, SYMBOL lsym, SYMBOL rsym, STATE state)
+	int CreateRChild(int parent, char lsym, char rsym, STATE state)
 	{
 		int child = CreateNode(lsym, rsym, state);
 		nodes[parent].rchild = child;
@@ -130,14 +130,14 @@ public:
 		}
 	}
 	
-	Sequence<SYMBOL> GetSequence();
+	std::string GetSequence();
 	
 	//build a parse tree from RNA structure
 	void Parse(const char* structure);
 	
 private:
 	//Return the index of the new node
-	int CreateNode(SYMBOL lsym, SYMBOL rsym, STATE state)
+	int CreateNode(char lsym, char rsym, STATE state)
 	{
 		ParseTreeNode newNode;
 		newNode.lsym = lsym;

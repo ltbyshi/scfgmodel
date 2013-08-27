@@ -34,7 +34,7 @@ void ParseTree::Parse(const char* structure)
 	BuildPairTable(structure, length, ptable);
 	
 	//Create root node
-	CreateNode(SYMBOL_EPS, SYMBOL_EPS, STATE_SS);
+	CreateNode('-', '-', STATE_SS);
 	//Push the root node into stack
 	Stack<TreeTrack> trackStk;
 	trackStk.Push(TreeTrack(GetRoot(), 0, length - 1));
@@ -45,24 +45,21 @@ void ParseTree::Parse(const char* structure)
 		if(T.begin >= T.end)
 		{
 			//Create an end node
-			CreateLChild(T.node, SYMBOL_EPS,
-				SYMBOL_EPS, STATE_E);
+			CreateLChild(T.node, '-', '-', STATE_E);
 			continue;
 		}
 		
 		if(ptable[T.begin] < 0)
 		{
 			//create a left node
-			T.node = CreateLChild(T.node, SYMBOL_SS,
-				SYMBOL_EPS, STATE_L);
+			T.node = CreateLChild(T.node, '.', '-', STATE_L);
 			T.begin ++;
 			trackStk.Push(T);
 		}
 		else if(ptable[T.end] < 0)
 		{
 			//create a right node
-			T.node = CreateLChild(T.node, SYMBOL_EPS,
-				SYMBOL_SS, STATE_R);
+			T.node = CreateLChild(T.node, '-', '.', STATE_R);
 			T.end --;
 			trackStk.Push(T);
 		}
@@ -73,8 +70,8 @@ void ParseTree::Parse(const char* structure)
 			{
 				//end pairs
 				//create a pair node
-				T.node = CreateLChild(T.node, SYMBOL_LP,
-					SYMBOL_RP, STATE_P);
+				T.node = CreateLChild(T.node, 
+								'(', ')', STATE_P);
 				T.begin ++;
 				T.end --;
 				trackStk.Push(T);
@@ -82,12 +79,12 @@ void ParseTree::Parse(const char* structure)
 			else
 			{
 				//create a new branch
-				int branch = CreateLChild(T.node, SYMBOL_EPS,
-					SYMBOL_EPS, STATE_B);
-				int lchild = CreateLChild(branch, SYMBOL_EPS,
-					SYMBOL_EPS, STATE_SL);
-				int rchild = CreateRChild(branch, SYMBOL_EPS,
-					SYMBOL_EPS, STATE_SR);
+				int branch = CreateLChild(T.node, 
+									'-' ,'-', STATE_B);
+				int lchild = CreateLChild(branch, 
+									'-', '-', STATE_SL);
+				int rchild = CreateRChild(branch,
+									'-', '-', STATE_SR);
 				
 				T.node = branch;
 				//position range below the left node
@@ -105,9 +102,9 @@ void ParseTree::Parse(const char* structure)
 	}
 }
 
-Sequence<SYMBOL> ParseTree::GetSequence()
+std::string ParseTree::GetSequence()
 {
-	Sequence<SYMBOL> seq;
+	std::string seq;
 	Stack<int> stk;
 		
 	ClearVisitedFlag();
@@ -117,12 +114,12 @@ Sequence<SYMBOL> ParseTree::GetSequence()
 		ParseTreeNode& node = nodes[stk.Top()];
 		if(node.visited)
 		{
-			seq.Append(node.rsym);
+			seq += node.rsym;
 			stk.Pop();
 		}
 		else
 		{
-			seq.Append(node.lsym);
+			seq += node.lsym;
 			bool hasChildren = false;
 			if(node.rchild >= 0)
 			{
@@ -138,7 +135,7 @@ Sequence<SYMBOL> ParseTree::GetSequence()
 			}
 			if(!hasChildren)
 			{
-				seq.Append(node.rsym);
+				seq += node.rsym;
 				stk.Pop();
 			}
 		}

@@ -58,13 +58,13 @@ struct TreeWriter
 	{
 		
 		os << "\tNode_" << parent << " [label=\"<lc> "
-			<< SymbolName(tree[parent].lsym) << "|<st> "
+			<< tree[parent].lsym << "|<st> "
 			<< StateName(tree[parent].state) << "|<rc> "
-			<< SymbolName(tree[parent].rsym) << "\"];" << endl;
+			<< tree[parent].rsym << "\"];" << endl;
 		os << "\tNode_" << child << " [label=\"<lc> "
-			<< SymbolName(tree[child].lsym) << "|<st> "
+			<< tree[child].lsym << "|<st> "
 			<< StateName(tree[child].state) << "|<rc> "
-			<< SymbolName(tree[child].rsym) << "\"];" << endl;
+			<< tree[child].rsym << "\"];" << endl;
 		os << "\tNode_" << parent << ":st"
 			<< " -> Node_" << child << ":st"
 			<< ";" << endl;

@@ -13,36 +13,6 @@ using namespace std;
 #include "parsetree.h"
 
 #if 1
-void  RandomNode(ParseTreeNode* node)
-{
-	node->state = Choose(ALLSTATES, NUMSTATES);
-	node->lsym = Choose(ALLSYMBOLS, NUMSYMBOLS);
-	node->rsym = Choose(ALLSYMBOLS, NUMSYMBOLS);
-}
-
-ParseTree* RandomParseTree(int nNodes)
-{
-	ParseTree* tree = new ParseTree;
-	int root = 0;
-
-	Queue<int> Q;
-	Q.Push(root);
-	for(int i = 0; i < nNodes; i ++)
-	{
-		int node = Q.Pop();
-		ParseTreeNode newNode;
-		RandomNode(&newNode);
-		int lchild = tree->CreateLChild(node, newNode.lsym,
-			newNode.rsym, newNode.state);
-		RandomNode(&newNode);
-		int rchild = tree->CreateRChild(node, newNode.lsym,
-			newNode.rsym, newNode.state);
-		Q.Push(lchild);
-		Q.Push(rchild);
-	}
-	
-	return tree;
-}
 
 void Test_ParseTree()
 {
@@ -55,13 +25,13 @@ void Test_ParseTree()
 	system("dot -Tpdf -o tree.pdf tree.dot");
 
 	tree.ClearVisitedFlag();
-	Sequence<SYMBOL> seq = tree.GetSequence();
+	string seq = tree.GetSequence();
 
 	cout << "sequence: ";
-	for(int i = 0; i < seq.Size(); i ++)
+	for(size_t i = 0; i < seq.size(); i ++)
 	{
-		if(seq[i] != SYMBOL_EPS)
-			cout << SymbolName(seq[i]);
+		if(seq[i] != '-')
+			cout << seq[i];
 	}
 	cout << endl;
 }
