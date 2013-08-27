@@ -59,11 +59,11 @@ struct TreeWriter
 		
 		os << "\tNode_" << parent << " [label=\"<lc> "
 			<< tree[parent].lsym << "|<st> "
-			<< StateName(tree[parent].state) << "|<rc> "
+			<< StateName[tree[parent].state] << "|<rc> "
 			<< tree[parent].rsym << "\"];" << endl;
 		os << "\tNode_" << child << " [label=\"<lc> "
 			<< tree[child].lsym << "|<st> "
-			<< StateName(tree[child].state) << "|<rc> "
+			<< StateName[tree[child].state] << "|<rc> "
 			<< tree[child].rsym << "\"];" << endl;
 		os << "\tNode_" << parent << ":st"
 			<< " -> Node_" << child << ":st"
@@ -108,10 +108,10 @@ struct GraphWriter
 	void operator()(int parent, int child)
 	{
 		os << "\tNode_" << parent << " [label=\""
-			<< CMStateName(graph[parent].state)
+			<< CMStateName[graph[parent].state]
 			<< "\"];" << endl;
 		os << "\tNode_" << child << " [label=\""
-			<< CMStateName(graph[child].state)
+			<< CMStateName[graph[child].state]
 			<< "\"];" << endl;
 		os << "\tNode_" << parent
 			<< " -> Node_" << child

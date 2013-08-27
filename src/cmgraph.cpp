@@ -99,7 +99,7 @@ void CMGraph::ExpandNode(ParseTree& tree,
 			nInsNodes = 0;
 			break;
 		default:
-			Die("Invalid state in parse tree: %s", StateName(treeNode.state));
+			Die("Invalid state in parse tree: %s", StateName[treeNode.state]);
 	}
 	//Connect MD nodes to ancestor nodes
 	CreateEdges(expNode.ancestors, expNode.nAncestors,
