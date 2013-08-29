@@ -34,40 +34,17 @@ struct CMGraphNode
 	//number of left/right symbols to emit
 	int nL, nR;
 	
+	CMGraphNode();
+	
 	int Size() const
 	{
 		return children.size();
 	}
 	
-	CMGraphNode()
-	: state(CMSTATE_ANY)
-	{
-	}
-	
-	CMGraphNode(CMSTATE state)
-	: state(state)
-	{
-	}
-	//Return the index of a child node
-	int GetChild(int i) const
-	{
-		return children[i];
-	}
 	//Return the index of a child node
 	int operator[](int i) const
 	{
 		return children[i];
-	}
-	//Return transition probability from the state
-	// to state i
-	PRECISION& TransProb(int i)
-	{
-		return tp[i];
-	}
-	//Return emission probability for pair s1, s2
-	PRECISION& EmitProb(SYMBOL s1, SYMBOL s2)
-	{
-		return ep[int(s1)][int(s2)];
 	}
 };
 
@@ -136,45 +113,36 @@ public:
 	//return the index of the created node
 	int CreateNode(CMSTATE state)
 	{
-		nodes.push_back(CMGraphNode(state));
+		CMGraphNode newNode;
+		newNode.state = state;
+		InitNode(newNode);
+		nodes.push_back(newNode);
 		return Size() - 1;
 	}
 	
 	void CreateEdge(int parent, int child)
 	{
 		nodes[parent].children.push_back(child);
-		nodes[parent].tp.push_back(0);
-		nodes[parent].tc.push_back(0);
+		nodes[parent].tp.push_back(0.0);
+		nodes[parent].tc.push_back(0.0);
 		nodes[child].parents.push_back(parent);
 	}
 	//Create an edge between parent and each children
 	void CreateEdges(int parent, 
-					 const std::vector<int> children)
-	{
-		for(size_t i = 0; i < children.size(); i ++)
-			CreateEdge(parent, children[i]);
-	}
+					 const std::vector<int> children);
 	//Create an edge between each ancestor and each child
 	void CreateEdges(const std::vector<int> ancestors,
-					 const std::vector<int> children)
-	{
-		for(size_t i = 0; i < ancestors.size(); i ++)
-			for(size_t j = 0; j < children.size(); j ++)
-				CreateEdge(ancestors[i], children[j]);
-	}
+					 const std::vector<int> children);
 	//Create an edge between each ancestor and each children
 	void CreateEdges(const int* ancestors, int nAncestors,
-					 const int* children, int nChildren)
-	{
-		for(int i = 0; i < nAncestors; i ++)
-			for(int j = 0; j < nChildren; j ++)
-				CreateEdge(ancestors[i], children[j]);
-	}
+					 const int* children, int nChildren);
 	//Create an edge to itself
 	void CreateCycle(int node)
 	{
 		CreateEdge(node, node);
 	}
+	//Assign default parameters to a node
+	void InitNode(CMGraphNode& node);
 	//NodeVisitor must overload () operator:
 	//void operator()(int node)
 	template <class NodeVisitor>

@@ -20,21 +20,21 @@ public:
 	PRECISION EmitProb(STATE state, SYMBOL left, SYMBOL right);
 	PRECISION TransProb(STATE curState, STATE nextState);
 	//sample a sequence
-	Vector<SYMBOL> Sample();
+	std::vector<SYMBOL> Sample();
 	//optimal sequence (most probable)
-	Vector<SYMBOL> Optimal();
+	std::vector<SYMBOL> Optimal();
 	//suboptimal sampling
-	Vector<SYMBOL> Suboptimal();
+	std::vector<SYMBOL> Suboptimal();
 	//Add a training sequence
-	void AddSequence(const vector<SYMBOL>& seq);
+	void AddSequence(const std::vector<SYMBOL>& seq);
 	//Clear all training sequences
 	void ClearSequences();
 private:
 	void InitModel(int nStates);
 	//Inside algorithm for one sequence
-	void Inside(const vector<SYMBOL>& seq);
+	void Inside(const std::vector<SYMBOL>& seq);
 	//Outside algorithm for one sequence
-	void Outside(const vector<SYMBOL& seq);
+	void Outside(const std::vector<SYMBOL>& seq);
 	//Calculate expected counts for each state transition and 
 	//symbol emission
 	void Expectation();
@@ -48,7 +48,7 @@ private:
 	//pair table
 	std::vector<int> ptable; 
 	//training sequences
-	std::list<vector<SYMBOL> > sequences;
+	std::list<std::vector<SYMBOL> > sequences;
 	std::vector<STATE> states;
 	//a(v, i, j): summed probability of all parse subtrees rooted at 
 	//state v for the subsequence [i,...,j]

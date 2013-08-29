@@ -1,6 +1,70 @@
 #include "cmgraph.h"
 #include "utils.h"
 
+CMGraphNode::CMGraphNode()
+{
+	state = CMSTATE_ANY;
+	for(int i = 0; i < NUMSYMBOLS; i ++)
+		for(int j = 0; j < NUMSYMBOLS; j ++)
+			ec[i][j] = 0.0;
+}
+
+void CMGraph::CreateEdges(int parent, 
+					 const std::vector<int> children)
+{
+	for(size_t i = 0; i < children.size(); i ++)
+		CreateEdge(parent, children[i]);
+}
+
+void CMGraph::CreateEdges(const std::vector<int> ancestors,
+					 const std::vector<int> children)
+{
+	for(size_t i = 0; i < ancestors.size(); i ++)
+		for(size_t j = 0; j < children.size(); j ++)
+			CreateEdge(ancestors[i], children[j]);
+}
+
+void CMGraph::CreateEdges(const int* ancestors,
+						int nAncestors,
+						const int* children,
+						int nChildren)
+{
+	for(int i = 0; i < nAncestors; i ++)
+		for(int j = 0; j < nChildren; j ++)
+			CreateEdge(ancestors[i], children[j]);
+}
+
+void CMGraph::InitNode(CMGraphNode& node)
+{
+	//Initialize transition probability
+	//Probability from one state to each child state are equal
+	for(int c = 0; c < node.Size(); c ++)
+		node.tp[c] = 1.0 / node.Size();
+	//Initialize emission probability
+	switch(node.state)
+	{
+		//Emit a pair of symbols
+		case CMSTATE_MP:
+			node.ep[SYMBOL_A][SYMBOL_U] = 0.25;
+			node.ep[SYMBOL_U][SYMBOL_A] = 0.25;
+			node.ep[SYMBOL_G][SYMBOL_C] = 0.25;
+			node.ep[SYMBOL_C][SYMBOL_G] = 0.25;
+			break;
+		//Emit a single symbol
+		case CMSTATE_IL:
+		case CMSTATE_ML:
+		case CMSTATE_IR:
+		case CMSTATE_MR:
+			for(int s = 0; s < NUMSYMBOLS; s ++)
+				node.ep[s][0] = 0.25;
+			break;
+		default:
+			//Emit no symbols
+			//All emission probability are zero
+			break;
+	}
+}
+
 void CMGraph::FromParseTree(ParseTree& tree)
 {
 	//Clear all nodes if the graph is not empty

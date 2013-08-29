@@ -1,4 +1,5 @@
 #include <cstring>
+using namespace std;
 
 #include "grammar.h"
 #include "stack.h"
@@ -73,14 +74,14 @@ void SCFGModel::Inside(const vector<SYMBOL>& seq)
 	{
 		for(int i = j; j >= 1; i --)
 		{
-			for(int v = m - 1; v >= 1; v --)
+			for(int v = M - 1; v >= 1; v --)
 			{
 				CMSTATE sv = graph[v].state;
 				if(sv == CMSTATE_E)
 				{
 					alpha(v, i, j) = 0.0;
 				}
-				else if(sv == CMSTATE_P
+				else if(sv == CMSTATE_MP
 					&& j == i)
 				{
 					alpha(v, i, j) = 0.0;
@@ -99,7 +100,7 @@ void SCFGModel::Inside(const vector<SYMBOL>& seq)
 				{
 					alpha(v, i, j) = 0.0;
 					for(int c = 0; c <= graph[v].Size(); c ++)
-						alpha(v, i, j) += graph.[v].tp[c] * 
+						alpha(v, i, j) += graph[v].tp[c] * 
 						alpha(graph[v][c], i + graph[v].nL, j - graph[v].nR);
 					int xi = seq[i - 1];
 					int xj = seq[j - 1];
@@ -125,7 +126,7 @@ void SCFGModel::Outside(const vector<SYMBOL>& seq)
 			for(int v = 1; v <= M - 1; v ++)
 			{
 				CMSTATE sv = graph[v].state;
-				if(state == CMSTATE_S)
+				if(sv == CMSTATE_S)
 				{
 					//S node has only one parent
 					int p = graph[v].parents[0];
@@ -155,7 +156,7 @@ void SCFGModel::Outside(const vector<SYMBOL>& seq)
 				{
 					beta(v, i, j) = 0.0;
 					//MP, ML, MR, D, B, E, IL, IR
-					for(int p = 0; p < graph[v].parents.size(); p ++)
+					for(size_t p = 0; p < graph[v].parents.size(); p ++)
 					{
 						int xi = seq[i - graph[p].nL - 1];
 						int xj = seq[j + graph[p].nR - 1];
@@ -188,23 +189,23 @@ void SCFGModel::Expectation()
 	}
 	//Calculate expected counts for each sequence
 	int M = graph.Size();	//number of states
-	for(int s = 0; s < sequences.size(); s ++)
+	for(list<vector<SYMBOL> >::iterator iter = sequences.begin(); iter != sequences.end(); ++ iter)
 	{
-		vector<SYMBOL>& seq = sequences[s];
+		vector<SYMBOL>& seq = *iter;
 		int L = seq.size();	//length of the sequence
 		Inside(seq);
 		Outside(seq);
 		//probability of the appearance of the sequence
-		Px = alpha(0, 1, L);
+		PRECISION Px = alpha(0, 1, L);
 		//Calculate total number of transitions
 		for(int v = 0; v < M; v ++)
 		{
-			PRECISION uc = 0.0;
+			PRECISION Ttot = 0.0;
 			for(int i = 1; i <= L + 1; i ++)
 				for(int j = i - 1; j <= L; j ++)
-					uc += alpha(v, i, j)*beta(v, i, j);
+					Ttot += alpha(v, i, j)*beta(v, i, j);
 			//Add to sum over all sequences
-			graph[v].uc += uc / Px;
+			graph[v].Ttot += Ttot / Px;
 		}
 		//Calculate number of transitions to next state
 		for(int v = 0; v < M; v ++)
@@ -232,16 +233,17 @@ void SCFGModel::Expectation()
 		for(int v = 0; v < graph.Size(); v ++)
 		{
 			CMSTATE sv = graph[v].state;
-			//symbols at both end of [i...j]
-			SYMBOL xi = seq[i - 1];
-			SYMBOL xj = seq[j - 1];
 			//Expected number of emissions from this state
 			PRECISION Etot = 0.0;
-			PRECISION ec[NUMSYMBOLS][NUMSYMBOLS] = {0.0};
+			PRECISION ec[NUMSYMBOLS][NUMSYMBOLS] = {{0.0}};
 			for(int i = 1; i <= L; i ++)
 			{
 				for(int j = 1; j <= L; j ++)
 				{
+					//symbols at both end of [i...j]
+					SYMBOL xi = seq[i - 1];
+					SYMBOL xj = seq[j - 1];
+					//Inside-outside variable
 					PRECISION ab = alpha(v, i, j)*beta(v, i, j);
 					Etot += ab;
 					if(sv == CMSTATE_MP)
@@ -326,4 +328,8 @@ void SCFGModel::Maximization()
 			//Emit no symbols
 		}
 	}
+}
+
+void SCFGModel::EMIter()
+{
 }
