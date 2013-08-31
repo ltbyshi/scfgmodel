@@ -9,6 +9,22 @@ CMGraphNode::CMGraphNode()
 			ec[i][j] = 0.0;
 }
 
+int CMGraph::CreateNode(CMSTATE state)
+{
+	CMGraphNode newNode;
+	newNode.state = state;
+	nodes.push_back(newNode);
+	return Size() - 1;
+}
+
+void CMGraph::CreateEdge(int parent, int child)
+{
+	nodes[parent].children.push_back(child);
+	nodes[parent].tp.push_back(0.0);
+	nodes[parent].tc.push_back(0.0);
+	nodes[child].parents.push_back(parent);
+}
+
 void CMGraph::CreateEdges(int parent, 
 					 const std::vector<int> children)
 {
@@ -34,34 +50,70 @@ void CMGraph::CreateEdges(const int* ancestors,
 			CreateEdge(ancestors[i], children[j]);
 }
 
-void CMGraph::InitNode(CMGraphNode& node)
+void CMGraph::InitParams()
 {
-	//Initialize transition probability
-	//Probability from one state to each child state are equal
-	for(int c = 0; c < node.Size(); c ++)
-		node.tp[c] = 1.0 / node.Size();
-	//Initialize emission probability
-	switch(node.state)
+	for(int i = 0; i < Size(); i ++)
 	{
-		//Emit a pair of symbols
-		case CMSTATE_MP:
-			node.ep[SYMBOL_A][SYMBOL_U] = 0.25;
-			node.ep[SYMBOL_U][SYMBOL_A] = 0.25;
-			node.ep[SYMBOL_G][SYMBOL_C] = 0.25;
-			node.ep[SYMBOL_C][SYMBOL_G] = 0.25;
-			break;
-		//Emit a single symbol
-		case CMSTATE_IL:
-		case CMSTATE_ML:
-		case CMSTATE_IR:
-		case CMSTATE_MR:
-			for(int s = 0; s < NUMSYMBOLS; s ++)
-				node.ep[s][0] = 0.25;
-			break;
-		default:
-			//Emit no symbols
-			//All emission probability are zero
-			break;
+		CMGraphNode& node = nodes[i];
+		//Initialize the number of emission symbols
+		switch(node.state)
+		{
+			case CMSTATE_MP:
+				node.nR = 1;
+				node.nL = 1;
+				break;
+			case CMSTATE_IL:
+			case CMSTATE_ML:
+				node.nL = 1;
+				node.nR = 0;
+				break;
+			case CMSTATE_IR:
+			case CMSTATE_MR:
+				node.nL = 0;
+				node.nR = 1;
+				break;
+			default:
+				node.nL = 0;
+				node.nR = 0;
+		}
+		//Initialize emission probability
+		switch(node.state)
+		{
+			//Emit a pair of symbols
+			case CMSTATE_MP:
+				node.ep[SYMBOL_A][SYMBOL_U] = 0.25;
+				node.ep[SYMBOL_U][SYMBOL_A] = 0.25;
+				node.ep[SYMBOL_G][SYMBOL_C] = 0.25;
+				node.ep[SYMBOL_C][SYMBOL_G] = 0.25;
+				break;
+			//Emit a single symbol
+			case CMSTATE_IL:
+			case CMSTATE_ML:
+			case CMSTATE_IR:
+			case CMSTATE_MR:
+				for(int s = 0; s < NUMSYMBOLS; s ++)
+					node.ep[s][0] = 0.25;
+				break;
+			default:
+				//Emit no symbols
+				//All emission probability are 1
+				for(int s = 0; s < NUMSYMBOLS; s ++)
+					node.ep[s][0] = 1.0;
+				break;
+		}
+		//Initialize transition probability
+		//For B state, the probability is 1
+		if(node.state == CMSTATE_B)
+		{
+			node.tp[0] = 1.0;
+			node.tp[1] = 1.0;
+		}
+		else
+		{
+			//Probability from one state to each child state are equal
+			for(int c = 0; c < node.Size(); c ++)
+				node.tp[c] = 1.0 / node.Size();
+		}
 	}
 }
 
@@ -96,6 +148,8 @@ void CMGraph::FromParseTree(ParseTree& tree)
 		else
 			node.treeNode = tree[node.treeNode].lchild;
 	}
+	//Initialize parameters
+	InitParams();
 }
 
 void CMGraph::ExpandNode(ParseTree& tree,

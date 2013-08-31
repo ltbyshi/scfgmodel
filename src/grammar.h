@@ -29,6 +29,13 @@ public:
 	void AddSequence(const std::vector<SYMBOL>& seq);
 	//Clear all training sequences
 	void ClearSequences();
+	//Train the model
+	void Train();
+	//Get the CM graph
+	CMGraph& GetCMGraph();
+	
+	//Set maximum number of iteration
+	void SetMaxIter(int n);
 private:
 	void InitModel(int nStates);
 	//Inside algorithm for one sequence
@@ -57,5 +64,8 @@ private:
 	//state v for the complete sequence excluding the subsequence
 	//[i,...,j]
 	Matrix3D<PRECISION> beta;
+private:
+	//settings
+	int maxIter;
 };
 #endif

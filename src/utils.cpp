@@ -1,7 +1,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <cstdio>
+#include <cstring>
 #include <cstdarg>
 using namespace std;
 
@@ -95,29 +97,40 @@ void PlotParseTree(const char* filename, ParseTree& tree)
 	fout.close();
 }
 
-struct GraphWriter
+vector<SYMBOL> StrToSeq(const char* seq)
 {
-	ostream& os;
-	CMGraph& graph;
-	
-	GraphWriter(ostream& os, CMGraph& graph)
-		: os(os), graph(graph)
-		{
-		}
-	
-	void operator()(int parent, int child)
+	size_t len = strlen(seq);
+	vector<SYMBOL> newSeq(len);
+	for(size_t i = 0; i < len; i ++)
 	{
-		os << "\tNode_" << parent << " [label=\""
-			<< CMStateName[graph[parent].state]
-			<< "\"];" << endl;
-		os << "\tNode_" << child << " [label=\""
-			<< CMStateName[graph[child].state]
-			<< "\"];" << endl;
-		os << "\tNode_" << parent
-			<< " -> Node_" << child
-			<< ";" << endl;
+		switch(seq[i])
+		{
+			case 'A':
+				newSeq[i] = SYMBOL_A;
+				break;
+			case 'U':
+				newSeq[i] = SYMBOL_U;
+				break;
+			case 'G':
+				newSeq[i] = SYMBOL_G;
+				break;
+			case 'C':
+				newSeq[i] = SYMBOL_C;
+				break;
+			default:
+				Die("Unrecognized character in RNA sequence: %c", seq[i]);
+		}
 	}
-};
+	return newSeq;
+}
+
+std::string SeqToStr(const std::vector<SYMBOL>& seq)
+{
+	string str;
+	for(size_t i = 0; i < seq.size(); i ++)
+		str += SymbolName[seq[i]];
+	return str;
+}
 
 void PlotCMGraph(const char* filename, CMGraph& graph)
 {
@@ -128,8 +141,28 @@ void PlotCMGraph(const char* filename, CMGraph& graph)
 	fout << "\tnode [shape=record,"
 		"fontname=\"Arial\","
 		"fontsize = 12.0];" << endl;
-	GraphWriter writer(fout, graph);
-	graph.TraverseEdges(writer);
+	fout << "\tedge [fontsize = 8.0];" << endl;
+	//Write nodes
+	fout << "//Nodes" << endl;
+	for(int i = 0; i < graph.Size(); i ++)
+		fout << "\t" << CMStateName[graph[i].state]
+			<< "_" << i << " [label=\""
+			<< CMStateName[graph[i].state] 
+			<< "\"];" << endl;
+	//Write Edges
+	fout << "//Edges" << endl;
+	fout.precision(2);
+	for(int i = 0; i < graph.Size(); i ++)
+	{
+		CMGraphNode& node = graph[i];
+		for(int c = 0; c < node.Size(); c ++)
+			fout << "\t" << CMStateName[node.state]
+				<< "_" << i << " -> "
+				<< CMStateName[graph[node[c]].state]
+				<< "_" << node[c] << " [label=\""
+				<< scientific << node.tp[c]
+				<< "\"];" << endl;
+	}
 	fout << "}";
 	fout.close();
 }

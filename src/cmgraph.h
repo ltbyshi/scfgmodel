@@ -111,22 +111,9 @@ public:
 		return nodes[i];
 	}
 	//return the index of the created node
-	int CreateNode(CMSTATE state)
-	{
-		CMGraphNode newNode;
-		newNode.state = state;
-		InitNode(newNode);
-		nodes.push_back(newNode);
-		return Size() - 1;
-	}
+	int CreateNode(CMSTATE state);
 	
-	void CreateEdge(int parent, int child)
-	{
-		nodes[parent].children.push_back(child);
-		nodes[parent].tp.push_back(0.0);
-		nodes[parent].tc.push_back(0.0);
-		nodes[child].parents.push_back(parent);
-	}
+	void CreateEdge(int parent, int child);
 	//Create an edge between parent and each children
 	void CreateEdges(int parent, 
 					 const std::vector<int> children);
@@ -141,8 +128,8 @@ public:
 	{
 		CreateEdge(node, node);
 	}
-	//Assign default parameters to a node
-	void InitNode(CMGraphNode& node);
+	//Initialize all parameters to default
+	void InitParams();
 	//NodeVisitor must overload () operator:
 	//void operator()(int node)
 	template <class NodeVisitor>
