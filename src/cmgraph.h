@@ -128,6 +128,8 @@ public:
 	{
 		CreateEdge(node, node);
 	}
+	//Save the CM graph to a file
+	void Dump(const char* fileName);
 	//Initialize all parameters to default
 	void InitParams();
 	//NodeVisitor must overload () operator:

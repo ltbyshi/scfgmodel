@@ -171,6 +171,7 @@ public:
 	
 	//Save the contents to a text file
 	void Dump(const char* fileName) const;
+	void DumpText(const char* fileName) const;
 private:
 	std::vector<T> data;
 	int size;
@@ -197,6 +198,18 @@ void Matrix3D<T>::Dump(const char* fileName) const
 	fout.seekp(32, std::ios::beg);
 	for(int i = 0; i < size; i ++)
 		fout.write(reinterpret_cast<const char*>(&data[i]), sizeof(T));
+	fout.close();
+}
+
+template <class T>
+void Matrix3D<T>::DumpText(const char* fileName) const
+{
+	std::ofstream fout;
+	fout.open(fileName);
+	if(!fout)
+		return;
+	for(int i = 0; i < size; i ++)
+		fout << data[i] << " ";
 	fout.close();
 }
 

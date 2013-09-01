@@ -1,10 +1,15 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include <cmath>
+#include <signal.h>
 using namespace std;
 
 #include "grammar.h"
 #include "stack.h"
+#include "utils.h"
+
+//#define ENABLE_PRIOR
 
 SCFGModel::SCFGModel()
 {
@@ -138,8 +143,8 @@ void SCFGModel::Outside(const vector<SYMBOL>& seq)
 					//S node has only one parent
 					int p = graph[v].parents[0];
 					//B node has two children
-					int lc = graph[p].children[0];
-					int rc = graph[p].children[1];
+					int lc = graph[p][0];
+					int rc = graph[p][1];
 					
 					beta(v, i, j) = 0.0;
 					if(lc == sv)
@@ -157,6 +162,7 @@ void SCFGModel::Outside(const vector<SYMBOL>& seq)
 					else
 					{
 						//invalid state
+						Die("Invalid state found: %d", v);
 					}
 				}
 				else
@@ -171,15 +177,28 @@ void SCFGModel::Outside(const vector<SYMBOL>& seq)
 							|| (j + graph[p].nR - 1 < 0)
 							|| (j + graph[p].nR - 1 >= L))
 						{	//avoid indexing out of range
-							beta(v, i, j) = 0.0;
+							//cout << "beta(" << v << ", " << i << ", " << j << ") is out of range" << endl;
+							beta(v, i, j) += 0.0;
 						}
 						else
 						{
 							int xi = seq[i - graph[p].nL - 1];
 							int xj = seq[j + graph[p].nR - 1];
-							beta(v, i, j) += graph[p].ep[xi][xj]
-									* graph[p].tp[v]
-									* beta(p, i - graph[p].nL, j + graph[p].nR);
+							//Find index of node v in the children of node p
+							int vi = 0;
+							for(vi = 0; vi < graph[p].Size(); vi ++)
+							{
+								if(graph[p][vi] == v)
+									break;
+							}
+							
+							beta(v, i, j) += graph[p].ep[xi][xj] * graph[p].tp[vi] * beta(p, i - graph[p].nL, j + graph[p].nR);
+							
+							if(isnan(fabs(beta(v, i, j))))
+							{
+								cout << "beta(" << v << ", " << i << ", " << j << ") = " << beta(v, i, j) << endl;
+								raise(SIGTRAP);
+							}
 						}
 					}
 				}
@@ -215,16 +234,18 @@ void SCFGModel::Expectation()
 		Inside(seq);
 		Outside(seq);
 		
-		/*
-		alpha.Dump("alpha.mat");
-		beta.Dump("beta.mat");
-		exit(-1);
-		*/
 		//probability of the appearance of the sequence
 		PRECISION Px = alpha(0, 1, L);
 		if(Px < 1.0e-100 && Px > -1.0e-100)
 			continue;
 		cout << "P(x) = " << Px << endl;
+		
+		/*
+		alpha.DumpText("alpha.mat");
+		beta.DumpText("beta.mat");
+		exit(-1);
+		*/
+		
 		//Calculate total number of transitions
 		for(int v = 0; v < M; v ++)
 		{
@@ -250,7 +271,7 @@ void SCFGModel::Expectation()
 						tc += beta(v, i, j)
 							* graph[v].ep[xi][xj]
 							* graph[v].tp[c]
-							* alpha(c, i + graph[v].nL, j - graph[v].nR);
+							* alpha(graph[v][c], i + graph[v].nL, j - graph[v].nR);
 					}
 				}
 				//Add to sum over all sequences
@@ -326,20 +347,23 @@ void SCFGModel::Maximization()
 	//Estimate transition probability
 	for(int v = 0; v < graph.Size(); v ++)
 	{
-		PRECISION prior;
-		if(graph[v].state == CMSTATE_B)
-			prior = 1.0;
-		else
+		//B states need not be estimated
+		if(graph[v].state != CMSTATE_B)
 		{
+#ifdef ENABLE_PRIOR
+			//Prior transition probability
+			PRECISION prior;
 			if(graph[v].Size() > 0)
 				prior = 1.0 / graph[v].Size();
 			else
 				//E state
 				prior = 1.0;
-		}
-		for(int c = 0; c < graph[v].Size(); v ++)
-		{
-			graph[v].tp[c] = (graph[v].tc[c] + prior) / (graph[v].Ttot + 1.0);
+			for(int c = 0; c < graph[v].Size(); v ++)
+				graph[v].tp[c] = (graph[v].tc[c] + prior) / (graph[v].Ttot + 1.0);
+#else
+			for(int c = 0; c < graph[v].Size(); c ++)
+				graph[v].tp[c] = graph[v].tc[c] / graph[v].Ttot;
+#endif
 		}
 	}
 	//Estimate emission probability
@@ -351,7 +375,11 @@ void SCFGModel::Maximization()
 			//Emit a pair
 			for(int a = 0; a < NUMSYMBOLS; a ++)
 				for(int b = 0; b < NUMSYMBOLS; b ++)
+#ifdef ENABLE_PRIOR
 					graph[v].ep[a][b] = (graph[v].ec[a][b] + 0.25) / (graph[v].Etot + 1.0);
+#else
+					graph[v].ep[a][b] = graph[v].ec[a][b] / graph[v].Etot;
+#endif
 		}
 		else if(sv == CMSTATE_IL
 			|| sv == CMSTATE_ML
@@ -360,17 +388,17 @@ void SCFGModel::Maximization()
 		{
 			//Emit a single symbol
 			for(int a = 0; a < NUMSYMBOLS; a ++)
+#ifdef ENABLE_PRIOR
 				graph[v].ep[a][0] = (graph[v].ec[a][0] + 0.25) / (graph[v].Etot + 1.0);
+#else
+				graph[v].ep[a][0] = graph[v].ec[a][0] / graph[v].Etot;
+#endif
 		}
 		else
 		{
 			//Emit no symbols
 		}
 	}
-}
-
-void SCFGModel::EMIter()
-{
 }
 
 void SCFGModel::Train()

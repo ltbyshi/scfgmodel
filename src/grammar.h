@@ -47,7 +47,6 @@ private:
 	void Expectation();
 	//Estimate model parameters from expected counts
 	void Maximization();
-	void EMIter();
 private:
 	int nStates;
 	ParseTree tree;

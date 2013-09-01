@@ -147,11 +147,12 @@ void PlotCMGraph(const char* filename, CMGraph& graph)
 	for(int i = 0; i < graph.Size(); i ++)
 		fout << "\t" << CMStateName[graph[i].state]
 			<< "_" << i << " [label=\""
-			<< CMStateName[graph[i].state] 
+			<< CMStateName[graph[i].state]
+			<< "_" << i
 			<< "\"];" << endl;
 	//Write Edges
 	fout << "//Edges" << endl;
-	fout.precision(2);
+	fout.precision(3);
 	for(int i = 0; i < graph.Size(); i ++)
 	{
 		CMGraphNode& node = graph[i];
@@ -160,7 +161,7 @@ void PlotCMGraph(const char* filename, CMGraph& graph)
 				<< "_" << i << " -> "
 				<< CMStateName[graph[node[c]].state]
 				<< "_" << node[c] << " [label=\""
-				<< scientific << node.tp[c]
+				<< node.tp[c]
 				<< "\"];" << endl;
 	}
 	fout << "}";

@@ -1,12 +1,13 @@
+#include <fstream>
+
 #include "cmgraph.h"
 #include "utils.h"
+
+using namespace std;
 
 CMGraphNode::CMGraphNode()
 {
 	state = CMSTATE_ANY;
-	for(int i = 0; i < NUMSYMBOLS; i ++)
-		for(int j = 0; j < NUMSYMBOLS; j ++)
-			ec[i][j] = 0.0;
 }
 
 int CMGraph::CreateNode(CMSTATE state)
@@ -77,6 +78,9 @@ void CMGraph::InitParams()
 				node.nR = 0;
 		}
 		//Initialize emission probability
+		for(int a = 0; a < NUMSYMBOLS; a ++)
+			for(int b = 0; b < NUMSYMBOLS; b ++)
+				node.ep[a][b] = 0.0;
 		switch(node.state)
 		{
 			//Emit a pair of symbols
@@ -91,15 +95,16 @@ void CMGraph::InitParams()
 			case CMSTATE_ML:
 			case CMSTATE_IR:
 			case CMSTATE_MR:
-				for(int s = 0; s < NUMSYMBOLS; s ++)
-					node.ep[s][0] = 0.25;
+				for(int a = 0; a < NUMSYMBOLS; a ++)
+					node.ep[a][0] = 0.25;
 				break;
 			default:
+				//S, E, B
 				//Emit no symbols
 				//All emission probability are 1
-				for(int s = 0; s < NUMSYMBOLS; s ++)
-					node.ep[s][0] = 1.0;
-				break;
+				for(int a = 0; a < NUMSYMBOLS; a ++)
+					for(int b = 0; b < NUMSYMBOLS; b ++)
+						node.ep[a][b] = 1.0;
 		}
 		//Initialize transition probability
 		//For B state, the probability is 1
@@ -234,4 +239,59 @@ void CMGraph::ExpandNode(ParseTree& tree,
 		expNode.ancestors[i] = MDNodes[i];
 	for(int i = 0; i < nInsNodes; i ++)
 		expNode.ancestors[i + nMDNodes] = InsNodes[i];
+}
+
+void CMGraph::Dump(const char* fileName)
+{
+	ofstream fout;
+	fout.open(fileName);
+	if(!fout)
+		Die("Could not save the CM graph to file: %s", fileName);
+	fout << "GR\tcmgraph" << endl;
+	fout << "SZ\t" << Size() << endl;
+	for(int i = 0; i < Size(); i ++)
+	{
+		CMGraphNode& node = nodes[i];
+		fout << "NO\t" << i << endl;
+		fout << "ST\t" << CMStateName[node.state] << endl;
+		fout << "SZ\t" << node.Size() << endl;
+		
+		fout << "CH\t";
+		for(int c = 0; c < node.Size(); c ++)
+			fout << node[c] << " ";
+		fout << endl;
+		
+		fout << "PA\t";
+		for(size_t p = 0; p < node.parents.size(); p ++)
+			fout << node.parents[p] << " ";
+		fout << endl;
+		
+		fout << "TP\t";
+		for(int c = 0; c < node.Size(); c ++)
+			fout << node.tp[c] << " ";
+		fout << endl;
+		
+		fout << "TC\t";
+		for(int c = 0; c < node.Size(); c ++)
+			fout << node.tc[c] << " ";
+		fout << endl;
+		
+		fout << "EP\t";
+		for(int a = 0; a < NUMSYMBOLS; a ++)
+			for(int b = 0; b < NUMSYMBOLS; b ++)
+				fout << node.ep[a][b] << " ";
+		fout << endl;
+		
+		fout << "EC\t";
+		for(int a = 0; a < NUMSYMBOLS; a ++)
+			for(int b = 0; b < NUMSYMBOLS; b ++)
+				fout << node.ec[a][b] << " ";
+		fout << endl;
+		
+		fout << "TT\t" << node.Ttot << endl;
+		fout << "ET\t" << node.Etot << endl;
+		fout << "NL\t" << node.nL << endl;
+		fout << "NR\t" << node.nR << endl;
+	}
+	fout.close();
 }
